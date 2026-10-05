@@ -179,10 +179,54 @@ const P5=new Set(['USA','CHN','RUS','GBR','FRA']);
 const BLOCS={
  NATO:new Set(['USA','GBR','FRA','DEU','ITA','ESP','CAN','POL','NLD','BEL','PRT','GRC','TUR','NOR','DNK','ISL','LUX','CZE','HUN','SVK','ROU','BGR','HRV','SVN','EST','LVA','LTU','ALB','MNE','MKD','FIN','SWE']),
  EU:new Set(['DEU','FRA','ITA','ESP','NLD','BEL','POL','SWE','AUT','IRL','DNK','FIN','PRT','GRC','CZE','HUN','ROU','BGR','HRV','SVK','SVN','LTU','LVA','EST','LUX','CYP','MLT']),
- CSTO:new Set(['RUS','BLR','KAZ','ARM','KGZ','TJK']),
+ CSTO:new Set(['RUS','BLR','KAZ','KGZ','TJK']), // Armenia left out: participation frozen since Feb 2024 (confirmed to Russia 1 Apr 2026) — armenpress.am
  GCC:new Set(['SAU','ARE','QAT','KWT','OMN','BHR'])};
 function blocsOf(id){const r=[];for(const b in BLOCS)if(BLOCS[b].has(id))r.push(b);return r;}
 function areRival(a,b){const w=x=>x.includes('NATO')||x.includes('EU'),e=x=>x.includes('CSTO');return (w(a)&&e(b))||(e(a)&&w(b));}
+/* Groupings: sharing one warms starting relations with the player but never makes an ally (only BLOCS do).
+   Members as each organisation lists them, checked 2026-10-05. Suspended members are left out;
+   members that are not on the map (Bahrain, Comoros, Singapore, Cabo Verde, Mauritius…) are skipped. */
+const GROUPINGS={
+ 'Arab League':new Set(['DZA','DJI','EGY','IRQ','JOR','KWT','LBN','LBY','MRT','MAR','OMN','PSE','QAT','SAU','SOM','SDN','SYR','TUN','ARE','YEM']), // 22 members incl. Palestine and Syria (readmitted 7 May 2023) — leagueofarabstates.net
+ 'African Union':new Set(['AGO','BDI','BEN','BWA','CAF','CIV','CMR','COD','COG','DJI','DZA','EGY','ERI','ESH','ETH','GAB','GHA','GIN','GMB','GNQ','KEN','LBR','LBY','LSO','MAR','MOZ','MRT','MWI','NAM','NGA','RWA','SEN','SLE','SOM','SSD','SWZ','TCD','TGO','TUN','TZA','UGA','ZAF','ZMB','ZWE']), // 55 members incl. the SADR (Western Sahara); suspended: Burkina Faso, Guinea-Bissau, Madagascar, Mali, Niger, Sudan; Guinea reinstated Jan 2026 — au.int member states
+ ASEAN:new Set(['BRN','KHM','IDN','LAO','MYS','MMR','PHL','THA','VNM','TLS']), // 11 members incl. Timor-Leste (admitted 26 Oct 2025) — asean.org
+ BRICS:new Set(['BRA','RUS','IND','CHN','ZAF','EGY','ETH','IRN','ARE','IDN']), // members incl. Indonesia (Jan 2025); Saudi Arabia left out: invited in 2023, membership not confirmed by Riyadh — brics.br
+ SCO:new Set(['CHN','IND','IRN','KAZ','KGZ','PAK','RUS','TJK','UZB','BLR']), // 10 members incl. Belarus (Jul 2024) — eng.sectsco.org
+ Mercosur:new Set(['ARG','BRA','PRY','URY','BOL']), // full members incl. Bolivia (Jul 2024); Venezuela suspended since Dec 2016 — mercosur.int
+ ECOWAS:new Set(['BEN','CIV','GMB','GHA','GIN','LBR','NGA','SEN','SLE','TGO']), // 12 members since Burkina Faso, Mali, Niger left (29 Jan 2025); Guinea-Bissau suspended since Nov 2025; Guinea reinstated Jan 2026 — ecowas.int
+ G7:new Set(['CAN','FRA','DEU','ITA','JPN','GBR','USA'])}; // the EU also takes part — g7 presidency sites
+function groupsOf(id){const r=[];for(const g in GROUPINGS)if(GROUPINGS[g].has(id))r.push(g);return r;}
+/* Bilateral ties: each one an objective, sourced fact, applied to relations with the player at game start.
+   treaty: friendly but not an ally · border: an armed border dispute cancels shared-grouping warmth ·
+   cool: no diplomatic relations, recent armed clashes or a sanctions regime · war: armed conflict between the two.
+   A row may list several partners; {b} in its fact stands for the partner's name. */
+const TIE_REL={treaty:70,border:45,cool:36,war:30};
+const TIES=[
+ ['USA','JPN','treaty','Treaty of Mutual Cooperation and Security (1960)','mofa.go.jp'],
+ ['USA','KOR','treaty','Mutual Defense Treaty (1953)','US State Dept, Treaties in Force'],
+ ['USA','PHL','treaty','Mutual Defense Treaty (1951)','US State Dept, Treaties in Force'],
+ ['USA','AUS','treaty','ANZUS Treaty (1951)','US State Dept, Treaties in Force'],
+ ['AUS','NZL','treaty','ANZUS Treaty (1951)','dfat.gov.au'],
+ ['CHN','PRK','treaty','Treaty of Friendship, Cooperation and Mutual Assistance (1961)','UN Treaty Series'],
+ ['RUS','PRK','treaty','Comprehensive Strategic Partnership Treaty, mutual assistance in Art. 4 (in force Dec 2024)','kremlin.ru'],
+ ['SAU','PAK','treaty','Strategic Mutual Defence Agreement (Sep 2025)','spa.gov.sa'],
+ ['TUR','AZE','treaty','Shusha Declaration with a mutual assistance clause (Jun 2021)','president.az'],
+ ['IND','CHN','border','Disputed border (Line of Actual Control); deadly clash in the Galwan Valley, Jun 2020','mea.gov.in'],
+ ['IND','PAK','cool','Armed clashes across the Line of Control, 7–10 May 2025','mea.gov.in; ispr.gov.pk'],
+ ['RUS','UKR','war','Armed conflict since Feb 2022; Ukraine cut diplomatic relations on 24 Feb 2022','UN General Assembly resolution ES-11/1'],
+ ['RUS',['JPN','KOR','AUS','NZL','CHE','TWN'],'cool','{b} has applied sanctions on Russia since 2022; Russia lists {b} as an unfriendly state','Russian Government Order 430-r (5 Mar 2022)'],
+ ['USA','IRN','cool','No diplomatic relations since 1980','state.gov'],
+ ['ISR','IRN','cool','No diplomatic relations since 1979; direct strikes on each other in 2024 and 2025','UN Security Council records'],
+ ['USA','PRK','cool','No diplomatic relations; UN Security Council sanctions (resolution 1718, 2006)','un.org/securitycouncil'],
+ ['JPN','PRK','cool','No diplomatic relations','mofa.go.jp'],
+ ['KOR','PRK','cool','No diplomatic relations; 1953 armistice, no peace treaty','UN Command records'],
+ ['USA','CUB','cool','US embargo in force since 1962 (Cuban Assets Control Regulations)','ofac.treasury.gov'],
+ ['DZA','MAR','cool','Algeria cut diplomatic relations in Aug 2021','mfa.gov.dz'],
+ ['MAR','ESH','cool','Armed clashes since the 1991 ceasefire ended in Nov 2020','UN Secretary-General report S/2021/843'],
+ ['TUR','CYP','cool','Turkey does not recognise the Republic of Cyprus','mfa.gov.tr'],
+ ['SRB','CS-KM','cool','Serbia does not recognise Kosovo’s 2008 declaration of independence','mfa.gov.rs']
+];
+function tieWith(id){if(!player)return null;for(const t of TIES){const bs=Array.isArray(t[1])?t[1]:[t[1]];if((t[0]===player&&bs.includes(id))||(t[0]===id&&bs.includes(player)))return t;}return null;}
 const EVENTS=[
  {t:'Banking crisis',d:'Your largest banks are dangerously overleveraged and on the brink of collapse.',o:[
    {l:'Bail them out (costly)',f:()=>{me.treasury-=me.gdp*0.05;if(me.treasury<0){me.debt+=-me.treasury;me.treasury=0;}me.approval=clamp(me.approval-3,0,100);return 'You bailed out the banks. The system held, but the bill was enormous.';}},
@@ -330,7 +374,9 @@ function initState(){
  }
  initPairwiseRelations();PR_HOSTILE={};eventCD={};gameDay=0;
 }
-let player=null,me=null,date=new Date(2025,0,1),auto=false,autoSpeed=1,autoOpts=[1,5,20],ended=false,feed=[],dirty=true,pendingEvent=null;
+/* the game calendar runs in UTC (Date.UTC, getUTCMonth, timeZone:'UTC'), so one seed plays the same game in every time zone */
+const GAME_START=Date.UTC(2025,0,1);
+let player=null,me=null,date=new Date(GAME_START),auto=false,autoSpeed=1,autoOpts=[1,5,20],ended=false,feed=[],dirty=true,pendingEvent=null;
 
 const svg=document.getElementById('map');
 let vb={x:0,y:0,w:1000,h:500};
@@ -427,7 +473,7 @@ const FX={
  /* your trade routes: refreshed each month, or at once when a route's health changes (war, hostility, sanctions, tariffs) */
  routeKind(id){const c=C[id];return me.war?.enemy===id||c.rel<32||c.press?.sanc?'bad':(c.press?.tar||c.press?.exp)?'warn':'good';},
  arcsDue(){if(!player){if(this.arcKey){this.arcKey='';const g=document.getElementById('fxArcs');if(g)g.textContent='';}return;}
-  const k=player+':'+date.getFullYear()+'-'+date.getMonth()+':'+tradePartners(player).slice(0,6).map(([id])=>this.routeKind(id)[0]).join('');
+  const k=player+':'+date.getUTCFullYear()+'-'+date.getUTCMonth()+':'+tradePartners(player).slice(0,6).map(([id])=>this.routeKind(id)[0]).join('');
   if(k!==this.arcKey){this.arcKey=k;this.tradeArcs();}},
  tradeArcs(){const g=document.getElementById('fxArcs');if(!g)return;g.textContent='';if(!player)return;
   const a=this.at(player),still=this.reduced(),N=12;
@@ -471,7 +517,7 @@ function say(t,cls,about){if(about&&!about.some(inMyCircle))return;feed.unshift(
 function inMyCircle(id){if(!me)return false;if(id===player)return true;const c=C[id];if(!c)return false;
  if(c.ally||c.status==='econ'||c.status==='annex'||me.war?.enemy===id||anyPressureOn(c))return true;
  return tradePartners(player).slice(0,5).some(p=>p[0]===id);}
-function fmtDate(){return date.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtDate(){return date.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});}
 
 /* ---- side skeleton ---- */
 function buildSide(){
@@ -501,10 +547,13 @@ function renderInspector(){
  if(c.milex)h+='<div class="row" style="margin-top:6px"><span class="k">Defense spend (SIPRI)</span><span class="v">'+usd(c.milex)+(c.milexGdp?' · '+c.milexGdp.toFixed(1)+'% GDP':'')+'</span></div>';
  const tps=tradePartners(c.id).slice(0,3);
  if(tps.length)h+='<div class="row"><span class="k">Top trade partners</span><span class="v" style="font-size:11px">'+tps.map(p=>C[p[0]]?.name?.split(' ')[0]+' '+Math.round(p[1]*100)+'%').join(' · ')+'</span></div>';
+ const mems=blocsOf(c.id).concat(groupsOf(c.id)),mine=player&&c.id!==player?blocsOf(player).concat(groupsOf(player)):[];
+ if(mems.length)h+='<div class="row"><span class="k">Member of</span><span class="v" style="font-size:11px">'+mems.map(g=>mine.includes(g)?'<b style="color:var(--you)">'+g+'</b>':g).join(' · ')+'</span></div>';
  if(player&&POWER_SET.has(c.id)&&c.id!==player)h+='<div class="row"><span class="k">Their view of you</span><span class="v">'+Math.round(getPR(c.id,player))+'</span></div>';
  if(!player){h+='<div class="acts"><button class="btn accent" onclick="choose(\''+c.id+'\')">Play as '+c.name+'</button></div>';el.innerHTML=h;return;}
  if(c.status==='player'){h+='<div class="hint" style="margin-top:9px">Your nation — manage its economy below.</div>';el.innerHTML=h;return;}
  h+='<div class="slab"><label><span>Relations with you</span><span>'+Math.round(c.rel)+'%</span></label><div class="bar"><div class="barf rel" style="width:'+clamp(c.rel,0,100)+'%"></div></div></div>';
+ const tie=tieWith(c.id);if(tie)h+='<div class="hint" style="margin-top:4px">'+tie[3].replace(/\{b\}/g,C[tie[0]===player?c.id:player].name)+' <span style="color:var(--t3)">· source: '+tie[4]+'</span></div>';
  h+='<div class="slab"><label><span>Economic control</span><span>'+Math.round(c.infl)+'%</span></label><div class="bar"><div class="barf" style="width:'+clamp(c.infl,0,100)+'%"></div></div></div>';
  const pp=c.press||{tar:0,sanc:0,exp:null},hasPr=pp.tar||pp.sanc||pp.exp;
  if(hasPr){const tw=tradeWeight(c.id,player);let mo=0;if(pp.tar)mo+=tw*20;if(pp.sanc)mo+=tw*30;if(pp.exp){const lev=clamp(depScore(c.id,pp.exp)-depScore(player,pp.exp),0,1);mo+=lev*20;}mo=Math.min(mo,8);
@@ -515,7 +564,7 @@ function renderInspector(){
  h+='<div class="acts"><button class="btn" onclick="doDeal(\''+c.id+'\')"'+da+'>Deal</button>'
   +'<button class="btn" onclick="doBuyBonds(\''+c.id+'\')"'+da+'>Buy bonds \u00B7 '+usd(bondCost(c))+'</button>'
   +'<button class="btn" onclick="doDeclareWar(\''+c.id+'\')">Declare war</button>'
-  +(c.ally?'<button class="btn" onclick="doUnally(\''+c.id+'\')">Break alliance</button>':'<button class="btn" onclick="doAlly(\''+c.id+'\')">Form alliance</button>')
+  +(c.ally?'<button class="btn" onclick="doUnally(\''+c.id+'\')">Break alliance</button>':'<button class="btn" onclick="doAlly(\''+c.id+'\')"'+da+'>Form alliance</button>')
   +'</div>';
  h+='<div class="eyebrow" style="margin-top:12px">Economic pressure</div>';
  if(pp.tar){h+='<div class="acts"><button class="btn sm" style="border-color:var(--warn);color:var(--warn)" onclick="doLiftPressure(\''+c.id+'\',\'tar\')">Lift tariffs</button></div>';}
@@ -760,6 +809,9 @@ function choose(id){FX.reset();player=id;me=C[id];me.status='player';me.rel=100;
  me.openness=0.6;me.fxDebtShare=clamp(me.fxDebtShare??(0.62-((me.gdp/(me.pop||1e6))/60000)*0.5),0.03,0.85);me.trade=0;me.majorRel=50;me.effDebt=me.debt;me.majors=order.filter(id=>id!==player).map(id=>C[id]).sort((a,b)=>b.gdp-a.gdp).slice(0,12).map(x=>x.id);
  const myBlocs=blocsOf(player);me.allies=new Set();me.war=null;me.goldenDays=0;me.actsLeft=ACTS_PER_MONTH;me.actDay=gameDay;me.dev={infra:0,edu:0,ind:0,tech:0,health:0,fin:0};
  for(const _id of order){if(_id===player)continue;const cc=C[_id],cb=blocsOf(_id);if(cb.some(b=>myBlocs.includes(b))){cc.rel=78;cc.ally=true;me.allies.add(_id);}else if(areRival(myBlocs,cb)){cc.rel=32;cc.ally=false;}else{cc.ally=false;}}
+ const myGroups=groupsOf(player);
+ for(const _id of order){if(_id===player)continue;const cc=C[_id];if(cc.ally||cc.rel<50)continue;const n=groupsOf(_id).filter(g=>myGroups.includes(g)).length;if(n)cc.rel=Math.max(cc.rel,Math.min(58+4*(n-1),66));}
+ for(const _id of order){if(_id===player)continue;const cc=C[_id],t=tieWith(_id);if(!t||cc.ally)continue;const v=TIE_REL[t[2]];cc.rel=v>50?Math.max(cc.rel,v):Math.min(cc.rel,v);}
  sel=id;
  say('You now lead '+me.name+'. Advance time with ▸ Day, ▸▸ Month, or ▶ Auto.');
  buildEcon();renderDev();renderInspector();paint();updateLive();FX.pulse(id,'you');
@@ -798,7 +850,7 @@ function doLiftPressure(id,inst){const c=C[id];
 function setTxt(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
 function doDefend(){if(!me)return;const spend=me.reserves*0.30;if(spend<me.gdp*0.004){say('Reserves too low to defend the currency.','bad');updateLive();return;}me.reserves-=spend;me.fx=clamp(me.fx+9,10,340);say('Central bank intervened in FX markets — the currency steadied, reserves fell.','warn');updateLive();}
 function doBuildRes(){if(!me)return;const amt=Math.min(me.gdp*0.02,Math.max(me.treasury,0));if(amt<=0){say('No spare treasury to move into reserves — build a budget surplus first.','warn');updateLive();return;}me.treasury-=amt;me.reserves+=amt;say('Moved '+usd(amt)+' of treasury into foreign-exchange reserves.');updateLive();}
-function doAlly(id){const c=C[id];if(c.rel<55){say('Relations with '+c.name+' are too weak for an alliance — deepen them with deals first.','warn');renderInspector();return;}c.ally=true;me.allies.add(id);c.rel=clamp(c.rel+8,0,100);say('Alliance formed with '+c.name+'.','good');renderInspector();paint();updateLive();}
+function doAlly(id){if(!canAct())return;const c=C[id];if(c.rel<55){say('Relations with '+c.name+' are too weak for an alliance — deepen them with deals first.','warn');renderInspector();return;}useAct();c.ally=true;me.allies.add(id);c.rel=clamp(c.rel+8,0,100);say('Alliance formed with '+c.name+'.','good');renderInspector();paint();updateLive();}
 function doUnally(id){const c=C[id];c.ally=false;me.allies.delete(id);say('Alliance with '+c.name+' dissolved.','warn');renderInspector();paint();updateLive();}
 function doDeclareWar(id){if(me.war){say('You are already at war \u2014 resolve it first.','warn');renderInspector();return;}const c=C[id];if(c.ally){c.ally=false;me.allies.delete(id);order.forEach(o=>{const x=C[o];if(x.ally)x.rel=clamp(x.rel-12,0,100);});say('You declared war on your own ally '+c.name+' \u2014 a shocking betrayal.','bad');}
  me.war={enemy:id,name:c.name,score:0,duration:0,yourS:me.mil,enemyS:c.mil};c.rel=clamp(c.rel-30,0,100);me.infamy+=(P5.has(id)?20:8);
@@ -888,7 +940,7 @@ function serializeState(){
    };
   }
  }
- return{v:1,gameSeed,rngState,player,date:date.toISOString(),auto,autoSpeed,ended,sel,feed,vb,gameDay,eventCD,pr:PR,countries};
+ return{v:1,cal:'utc',gameSeed,rngState,player,date:date.toISOString(),auto,autoSpeed,ended,sel,feed,vb,gameDay,eventCD,pr:PR,countries};
 }
 function applySave(s){
  if(!s||s.v!==1||!s.player||!s.countries[s.player])return false;
@@ -907,7 +959,8 @@ function applySave(s){
  const pl=s.countries[player].pl;
  Object.assign(me,pl);me.allies=new Set(pl.allies||[]);me.dev=pl.dev||{infra:0,edu:0,ind:0,tech:0,health:0,fin:0};
  if(!me.majors||!me.majors.length)me.majors=order.filter(id=>id!==player).map(id=>C[id]).sort((a,b)=>b.gdp-a.gdp).slice(0,12).map(c=>c.id);
- date=new Date(s.date);auto=!!s.auto;autoSpeed=s.autoSpeed||1;ended=!!s.ended;sel=s.sel||player;feed=s.feed||[];
+ /* saves before the UTC calendar (no cal) hold local midnight: keep the calendar day the player saw */
+ date=s.cal==='utc'?new Date(s.date):(d=>new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())))(new Date(s.date));auto=!!s.auto;autoSpeed=s.autoSpeed||1;ended=!!s.ended;sel=s.sel||player;feed=s.feed||[];
  vb=s.vb||{x:0,y:0,w:1000,h:500};pendingEvent=null;dirty=true;
  FX.reset();applyVB();buildEcon();renderDev();renderInspector();paint();updateLive();
  const ab=document.getElementById('autoBtn');if(ab){ab.textContent=auto?'❚❚ Pause':'▶ Auto';ab.classList.toggle('accent',!auto);}
@@ -991,11 +1044,11 @@ function updateLive(){
 function advance(days){
  if(!player||ended)return;
  for(let d=0;d<days;d++){
-   const mo=date.getMonth();
+   const mo=date.getUTCMonth();
    date=new Date(date.getTime()+864e5);gameDay++;
    if(gameDay-(me.actDay||0)>=30){me.actsLeft=ACTS_PER_MONTH;me.actDay=gameDay;}
    economyStep(1);worldStep(1);
-   if(date.getMonth()!==mo)aiStep();
+   if(date.getUTCMonth()!==mo)aiStep();
    checkEnd();if(ended)break;
  }
  if(player&&!ended)doSave(true);
@@ -1015,7 +1068,7 @@ document.body.insertAdjacentHTML('beforeend','<input type="file" id="importFile"
 document.getElementById('exportBtn').insertAdjacentHTML('afterend','<button class="btn sm" id="importBtn" title="Load save file">Import</button>');
 document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change',e=>{if(e.target.files[0])doImport(e.target.files[0]);e.target.value='';});
-function doReset(){if(player&&!ended&&!confirm('Start over? Your current campaign and saves will be deleted.'))return;reseed((Date.now()^((Math.random()*0xFFFFFFFF)|0))>>>0);initState();player=null;me=null;date=new Date(2025,0,1);auto=false;autoSpeed=1;ended=false;sel=null;feed=[];vb={x:0,y:0,w:1000,h:500};applyVB();document.getElementById('banner').innerHTML='';document.getElementById('econ').innerHTML='';document.getElementById('dev').innerHTML='';document.getElementById('war').innerHTML='';document.getElementById('advisor').innerHTML='';document.getElementById('victory-bar').style.display='none';document.getElementById('speedBtn').textContent='1×';document.getElementById('autoBtn').textContent='▶ Auto';document.getElementById('autoBtn').classList.add('accent');pendingEvent=null;FX.reset();var _m=document.getElementById('modal');if(_m)_m.style.display='none';try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(SAVE_KEY_MANUAL);}catch(e){}if(window.Capacitor?.isNativePlatform?.()){window.Capacitor.Plugins.Preferences.remove({key:SAVE_KEY}).catch(()=>{});window.Capacitor.Plugins.Preferences.remove({key:SAVE_KEY_MANUAL}).catch(()=>{});}renderInspector();paint();updateLive();}
+function doReset(){if(player&&!ended&&!confirm('Start over? Your current campaign and saves will be deleted.'))return;reseed((Date.now()^((Math.random()*0xFFFFFFFF)|0))>>>0);initState();player=null;me=null;date=new Date(GAME_START);auto=false;autoSpeed=1;ended=false;sel=null;feed=[];vb={x:0,y:0,w:1000,h:500};applyVB();document.getElementById('banner').innerHTML='';document.getElementById('econ').innerHTML='';document.getElementById('dev').innerHTML='';document.getElementById('war').innerHTML='';document.getElementById('advisor').innerHTML='';document.getElementById('victory-bar').style.display='none';document.getElementById('speedBtn').textContent='1×';document.getElementById('autoBtn').textContent='▶ Auto';document.getElementById('autoBtn').classList.add('accent');pendingEvent=null;FX.reset();var _m=document.getElementById('modal');if(_m)_m.style.display='none';try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(SAVE_KEY_MANUAL);}catch(e){}if(window.Capacitor?.isNativePlatform?.()){window.Capacitor.Plugins.Preferences.remove({key:SAVE_KEY}).catch(()=>{});window.Capacitor.Plugins.Preferences.remove({key:SAVE_KEY_MANUAL}).catch(()=>{});}renderInspector();paint();updateLive();}
 
 /* ---- map interaction ---- */
 buildMap();buildSide();
