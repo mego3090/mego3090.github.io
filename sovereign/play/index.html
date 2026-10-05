@@ -47,6 +47,23 @@ svg{width:100%;height:100%;display:block;touch-action:none}
 .fx-float{font-family:var(--mono);font-weight:700;fill:var(--good);paint-order:stroke;stroke:#0b1220;stroke-opacity:.75;stroke-width:.28em;stroke-linejoin:round}
 .fx-float.bad{fill:var(--bad)}.fx-float.warn{fill:var(--warn)}.fx-float.you{fill:var(--you)}
 @media (prefers-reduced-motion: reduce){.fx-pulse{opacity:.85}}
+.lensbar{position:absolute;left:10px;top:10px;z-index:4;display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
+.lensbar .seg{display:flex;gap:2px;background:#0a1220e6;border:1px solid var(--borders);border-radius:9px;padding:2px;pointer-events:auto}
+.lensbar button{font-family:var(--sans);font-size:11.5px;padding:5px 10px;border:0;border-radius:7px;background:transparent;color:var(--t2);cursor:pointer}
+.lensbar button[aria-pressed="true"]{background:var(--panel2);color:var(--text)}
+.lensbar button[disabled]{opacity:.4;cursor:not-allowed}
+.lenskey{position:absolute;left:10px;bottom:10px;z-index:4;display:flex;flex-direction:column;gap:3px;background:#0a1220e6;border:1px solid var(--borders);border-radius:9px;padding:7px 9px;font-size:10.5px;color:var(--t2);font-family:var(--mono)}
+.lenskey[hidden]{display:none}
+.lenskey b{color:var(--text);font-weight:600;margin-bottom:2px}
+.lenskey i{display:inline-block;width:12px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid var(--borders)}
+.lenskey em{font-style:normal}.lenskey .short{display:none}
+@media(pointer:coarse){.lensbar button{padding:9px 12px;font-size:12.5px}}
+@media(max-width:800px){
+ .lenskey{top:58px;bottom:auto;flex-direction:row;flex-wrap:wrap;gap:3px 7px;padding:5px 8px;font-size:9.5px;max-width:calc(100% - 20px)}
+ .lenskey b{width:100%;margin:0}
+ .lenskey span{display:flex;flex-direction:column;align-items:center}
+ .lenskey i{margin:0 0 2px;width:18px}
+ .lenskey .full{display:none}.lenskey .short{display:inline}}
 .country{fill:var(--land);stroke:var(--lstroke);stroke-width:.3;cursor:pointer;transition:fill .5s,stroke .5s}
 .country:hover{filter:brightness(1.4)}
 .country.player{fill:var(--youl);stroke:var(--you);stroke-width:.6}
@@ -152,7 +169,7 @@ body{-webkit-tap-highlight-color:transparent}
    </div>
  </div>
  <div class="main">
-   <div class="mapwrap"><svg id="map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet"></svg><div class="tip" id="tip"></div></div>
+   <div class="mapwrap"><svg id="map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet"></svg><div class="tip" id="tip"></div><div class="lensbar" id="lensbar"></div><div class="lenskey" id="lenskey" hidden></div></div>
    <div class="side" id="side"></div>
  </div>
 </div>
@@ -341,21 +358,48 @@ function buildMap(){
   g+='<text class="lbl" data-id="'+c.id+'" x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" dy="'+(P5.has(c.id)?'1.45em':'.35em')+'" text-anchor="middle" display="none">'+nm+'</text>';}
  g+='</g><g id="fxTop"></g>';
  svg.innerHTML=g;
- LBL=DATA.countries.map(c=>{let w=0,h=0;for(const r of c.p){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const q of r){const p=proj(q[0],q[1]);x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1]);}if(x1-x0>w){w=x1-x0;h=y1-y0;}}
+ LBL=DATA.countries.map(c=>{let w=0,h=0,a=0;for(const r of c.p){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,s=0,f=null,q0=null;
+   for(const q of r){const p=proj(q[0],q[1]);x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1]);if(q0)s+=q0[0]*p[1]-p[0]*q0[1];else f=p;q0=p;}
+   if(f)s+=q0[0]*f[1]-f[0]*q0[1];a=Math.max(a,Math.abs(s)/2); /* largest landmass area; Equal Earth is equal-area */
+   if(x1-x0>w){w=x1-x0;h=y1-y0;}}
   const p=proj(c.c[0],c.c[1]);
-  return{id:c.id,el:svg.querySelector('.lbl[data-id="'+c.id+'"]'),x:p[0],y:p[1],p5:P5.has(c.id),w,h,em:null,on:false};}).sort((a,b)=>b.w-a.w);
+  return{id:c.id,el:svg.querySelector('.lbl[data-id="'+c.id+'"]'),x:p[0],y:p[1],p5:P5.has(c.id),w,h,a,em:null,on:false};}).sort((a,b)=>b.a-a.a);
 }
-/* greedy placement: the selected country, then yours, then widest first; a label that would overlap one already placed stays hidden */
+/* greedy placement: the selected country, then yours, then largest first; a label that would overlap one already placed stays hidden.
+   Big countries (on screen) may let their name overhang their outline, e.g. Argentina or South Africa at world zoom. */
+const LABEL_BIG_PX2=1000,LABEL_OVERHANG=2.4;
 function labelsLOD(){const r=svg.getBoundingClientRect();if(r.width<2)return;const k=r.width/vb.w,placed=[];
  const first=LBL.filter(L=>L.id===sel||L.id===player).sort((a,b)=>(b.id===sel)-(a.id===sel));
  for(const L of first.concat(LBL.filter(L=>L.id!==sel&&L.id!==player))){
   if(!L.em){L.el.setAttribute('display','inline');L.em=L.el.getComputedTextLength()/(parseFloat(getComputedStyle(L.el).fontSize)||1);L.el.setAttribute('display',L.on?'inline':'none');
    if(!L.em)continue;} /* not laid out yet: measure again next time */
-  const tw=L.em*LABEL_PX;let on=L.id===sel||(L.w*k>=tw+6&&L.h*k>=LABEL_PX*1.2);
+  const tw=L.em*LABEL_PX,room=L.w*k*(L.a*k*k>=LABEL_BIG_PX2?LABEL_OVERHANG:1);let on=L.id===sel||(room>=tw+6&&L.h*k>=LABEL_PX*1.2);
   if(on){const bw=(tw+14)/k,bh=LABEL_PX*1.3/k,cy=L.y+(L.p5?1.1*LABEL_PX/k:0),b=[L.x-bw/2,cy-bh/2,L.x+bw/2,cy+bh/2];
    if(L.id!==sel&&placed.some(o=>b[0]<o[2]&&b[2]>o[0]&&b[1]<o[3]&&b[3]>o[1]))on=false;else placed.push(b);}
   if(on!==L.on){L.on=on;L.el.setAttribute('display',on?'inline':'none');}
   L.el.classList.toggle('you',L.id===player);}}
+/* ---- map lenses (fun plan V2): the same map coloured by one question at a time, from C data. Bins sit on the game's own
+   rule lines; relations is diverging (red <- neutral land -> blue, 3 steps each side), trade is one sequential teal hue.
+   Steps validated with the dataviz palette validator on the land colour: each arm monotone, mild step >= 2:1 vs land,
+   red vs blue separated under colour-blind simulation at every step (deltaE >= 18).
+   Values are also in the tooltip and inspector, so colour never carries meaning alone. ---- */
+const LAND='#26303e';
+const LENSES={
+ control:{name:'Control'},
+ relations:{name:'Relations',title:'Relations with you',value:c=>c.rel,fmt:v=>String(Math.round(v)),
+  bins:[[20,'#f66d67','Enemies: under 20','<20'],[32,'#ce514d','Hostile: trade disrupted (<32)','<32'],[40,'#a83634','Cool: sanctions possible (<40)','<40'],
+        [55,LAND,'Neutral','–'],[65,'#1c5cab','Warm: alliance possible (55+)','55+'],[80,'#3987e5','Friendly','65+'],[Infinity,'#86b6ef','Close: 80+','80+']]},
+ trade:{name:'Trade',title:'Your share of their trade',value:c=>tradeWeight(c.id,player),fmt:v=>Math.round(v*100)+'%',
+  bins:[[1e-9,LAND,'Not a partner','–'],[0.05,'#006960','Under 5%','<5%'],[0.10,'#00867b','5–10%: tariffs bite','5%+'],[0.15,'#16a396','10–15%','10%+'],[Infinity,'#2ec1b3','15% and up','15%+']]},
+};
+let lens='control',lensUI='';try{const v=localStorage.getItem('sovereign_lens');if(LENSES[v])lens=v;}catch(e){}
+function lensNow(){return player?lens:'control';} /* relations and trade are relative to your nation */
+function lensFill(c){const L=LENSES[lensNow()];if(!L.bins||c.id===player)return '';const v=L.value(c);for(const [hi,col] of L.bins)if(v<hi)return col;return '';}
+function renderLens(){const k=lensNow()+(player?'1':'0');if(k===lensUI)return;lensUI=k;const el=document.getElementById('lensbar');if(!el)return;const cur=LENSES[lensNow()];
+ el.innerHTML='<div class="seg" role="group" aria-label="Map lens">'+Object.entries(LENSES).map(([id,L])=>'<button type="button" data-lens="'+id+'" aria-pressed="'+(id===lensNow())+'"'+(id!=='control'&&!player?' disabled title="Choose a nation first"':'')+'>'+L.name+'</button>').join('')+'</div>';
+ const key=document.getElementById('lenskey');if(!key)return;key.hidden=!cur.bins;
+ key.innerHTML=cur.bins?'<b>'+cur.title+'</b>'+cur.bins.map(([,col,lab,short])=>'<span title="'+lab+'"><i style="background:'+col+'"></i><em class="full">'+lab+'</em><em class="short">'+short+'</em></span>').join(''):'';}
+function setLens(id){if(!LENSES[id]||(id!=='control'&&!player))return;lens=id;try{localStorage.setItem('sovereign_lens',id);}catch(e){}paint();}
 /* ---- map motion (fun plan V3): pulse rings, floating numbers, flowing trade arcs. UI only: reads state, never changes it,
    never calls rng(). Animates only transform/opacity; under prefers-reduced-motion every effect has a still version. ---- */
 const SVGNS='http://www.w3.org/2000/svg';
@@ -414,7 +458,7 @@ const FX={
 for(const [fn,kind] of [['doDeal','good'],['doBuyBonds','good'],['doTariff','warn'],['doSanction','bad'],['doExportCtrl','warn'],['doLiftPressure','good'],['doAlly','good'],['doUnally','warn'],['doDeclareWar','bad'],['doPush','warn'],['doPeace','good'],['doInvest','good'],['doDefend','warn'],['doBuildRes','good'],['chooseEvent','warn']]){
  const f=window[fn];window[fn]=function(...a){const s=FX.snap(a[0]);const r=f.apply(this,a);FX.diff(s,kind);return r;};}
 function scls(s){return s==='player'?'player':s==='econ'?'econ':s==='annex'?'annex':s==='rival'?'rival':'';}
-function paint(){svg.querySelectorAll('.country').forEach(p=>{const c=C[p.dataset.id];p.setAttribute('class','country '+scls(c.status)+(c.ally&&c.status!=='player'?' ally':'')+(sel===c.id?' sel':''));FX.status(c);});labelsLOD();dirty=false;}
+function paint(){svg.querySelectorAll('.country').forEach(p=>{const c=C[p.dataset.id];p.setAttribute('class','country '+scls(c.status)+(c.ally&&c.status!=='player'?' ally':'')+(sel===c.id?' sel':''));p.style.fill=lensFill(c);FX.status(c);});renderLens();labelsLOD();dirty=false;}
 let sel=null;
 
 function heldGDP(){let s=0;for(const id of order){const c=C[id];if(c.status==='player'||c.status==='econ'||c.status==='annex')s+=c.gdp;}return s;}
@@ -975,6 +1019,7 @@ function doReset(){if(player&&!ended&&!confirm('Start over? Your current campaig
 
 /* ---- map interaction ---- */
 buildMap();buildSide();
+document.getElementById('lensbar').addEventListener('click',e=>{const b=e.target.closest('[data-lens]');if(b&&!b.disabled)setLens(b.dataset.lens);});
 const MINW=30,MAXW=1000;
 let vbRaf=0;function scheduleVB(){if(!vbRaf)vbRaf=requestAnimationFrame(()=>{vbRaf=0;applyVB();});}
 function zoomAt(px,py,f){const r=svg.getBoundingClientRect();const mx=vb.x+(px-r.left)/r.width*vb.w,my=vb.y+(py-r.top)/r.height*vb.h;const nw=clamp(vb.w*f,MINW,MAXW),nh=nw/2;vb.x=mx-(mx-vb.x)*(nw/vb.w);vb.y=my-(my-vb.y)*(nh/vb.h);vb.w=nw;vb.h=nh;scheduleVB();}
@@ -988,6 +1033,7 @@ svg.addEventListener('pointermove',e=>{
  if(t&&!p&&matchMedia('(hover:hover)').matches){const c=C[t.dataset.id];let tipHtml=(P5.has(c.id)?'<span class="p5">✦ </span>':'')+c.name;
   if(c.leader)tipHtml+='<br><span style="color:var(--t2);font-size:11px">'+(c.leaderTitle||'Leader')+': '+c.leader+'</span>';
   tipHtml+=' &nbsp;<span class="g">'+usd(c.gdp)+'</span> · mil '+Math.round(c.mil);
+  const LN=LENSES[lensNow()];if(LN.bins&&c.id!==player)tipHtml+='<br><span style="color:var(--t2);font-size:11px">'+LN.title+': <b style="color:var(--text)">'+LN.fmt(LN.value(c))+'</b></span>';
   tip.style.display='block';tip.innerHTML=tipHtml;const r=svg.parentElement.getBoundingClientRect();tip.style.left=(e.clientX-r.left+13)+'px';tip.style.top=(e.clientY-r.top+13)+'px';}else tip.style.display='none';
 });
 function endPtr(e){ptrs.delete(e.pointerId);pinchD=0;}
