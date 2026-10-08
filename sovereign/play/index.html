@@ -518,6 +518,52 @@ const EVENTS=[
    {l:'Call for a ceasefire and an open strait',fpeff:{peace:1},pub:1,r:'You called for a ceasefire and an open strait.'},
    {l:'Back the US and Israeli position',fpeff:{stance:0.05},rel:{IRN:-3,USA:2},pub:2,r:'You backed the US and Israeli position.'},
    {l:'Condemn the strikes on Iran',fpeff:{stance:-0.05},rel:{IRN:3,USA:-2},pub:2,r:'You condemned the strikes on Iran.'}]},
+ /* ---- CF-9: North–South Korea ---- */
+ {id:'ko_kor',fp:'korea',who:['KOR'],opening:true,cat:'flashpoint',cd:150,w:1,t:'Mines in the DMZ',d:'A joint inspection with the UN Command concluded that North Korea planted the mines that wounded three of your soldiers on 21 September; Pyongyang rejects responsibility. Your generals want a response, and your ministers want to keep the door to talks open.',o:[
+   {l:'Resume loudspeaker broadcasts across the border',fpeff:{heat:4},rel:{PRK:-4},eff:{approval:2},r:'You resumed loudspeaker broadcasts across the border.'},
+   {l:'Demand an apology and keep offering talks',fpeff:{heat:1,peace:1},eff:{approval:1},r:'You demanded an apology and kept offering talks.'},
+   {l:'Propose reviving the 2018 military agreement',fpeff:{peace:4,heat:-2},rel:{PRK:2},eff:{approval:-2},r:'You proposed reviving the 2018 military agreement.'}]},
+ {id:'ko_prk',fp:'korea',who:['PRK'],opening:true,cat:'flashpoint',cd:150,w:1,t:'Seoul demands an apology',d:'Seoul and the UN Command say your forces planted the mines that wounded South Korean soldiers, and demand an apology. The fortification of the border goes on.',o:[
+   {l:'Test-fire another missile',fpeff:{heat:5},rel:{KOR:-4,JPN:-2},eff:{approval:2,infamy:1},r:'You test-fired another missile.'},
+   {l:'Keep fortifying the border and say nothing',fpeff:{heat:1},r:'You kept fortifying the border.'},
+   {l:'Reopen the military hotline with the South',fpeff:{peace:4,heat:-2},rel:{KOR:3},eff:{approval:-1},r:'You reopened the military hotline.'}]},
+ {id:'ko_jpn',fp:'korea',who:['JPN'],cat:'flashpoint',cd:200,w:1,t:'A missile toward the Sea of Japan',d:'North Korea has test-fired an intermediate-range missile that it says can evade missile defences. It came down in the sea off North Korea’s east coast.',o:[
+   {l:'Expand missile defences',eff:{treasury:-0.004,approval:1},r:'You expanded missile defences.'},
+   {l:'Tighten sanctions with Seoul and Washington',fpeff:{stance:0.1},rel:{KOR:2,USA:2,PRK:-3},r:'You tightened sanctions with Seoul and Washington.'},
+   {l:'Seek talks with Pyongyang on the abductions',fpeff:{peace:2},rel:{PRK:2},r:'You sought talks with Pyongyang on the abductions.'}]},
+ {id:'ko_drills',fp:'korea',who:['USA'],cat:'flashpoint',cd:240,w:1,t:'Exercises with Seoul',d:'Your scaled-back exercises with South Korea come up for review. Seoul wants them restored after the mines in the DMZ; Pyongyang says the drills rule out any talks.',o:[
+   {l:'Restore the full exercises',fpeff:{stance:0.1,heat:3},rel:{KOR:3,PRK:-3},r:'You restored the full exercises.'},
+   {l:'Keep them scaled back to leave room for talks',fpeff:{peace:2},rel:{KOR:-1,PRK:1},r:'You kept the exercises scaled back.'},
+   {l:'Fly strategic bombers over the peninsula',fpeff:{heat:5},rel:{KOR:2,PRK:-5,CHN:-2},eff:{approval:1},r:'You flew strategic bombers over the peninsula.'}]},
+ {id:'say_korea',fp:'korea',role:['backer','stake','bystander'],cat:'flashpoint',cd:300,w:1,t:'A statement on Korea',d:'Governments are stating their positions after North Korea’s latest missile test and the mines in the DMZ.',o:[
+   {l:'Call for calm and talks on the peninsula',fpeff:{peace:1},r:'You called for calm and talks on the peninsula.'},
+   {l:'Back the denuclearisation of North Korea',fpeff:{stance:0.05},rel:{PRK:-3,KOR:2},pub:2,r:'You backed the denuclearisation of North Korea.'},
+   {l:'Back North Korea’s call to end sanctions and joint drills',fpeff:{stance:-0.05},rel:{PRK:3,KOR:-2,USA:-1},pub:2,r:'You backed North Korea’s call.'}]},
+ /* ---- CF-9: the Red Sea and Yemen. The Houthi movement is a non-state side: no option helps it (Conflicts plan §5) ---- */
+ {id:'rs_yem',fp:'redsea',who:['YEM'],opening:true,cat:'flashpoint',cd:150,w:1,t:'The offensive on the coast',d:'Your forces, backed by Saudi air strikes, are pushing the Houthis back along the Red Sea coast. The UN envoy urges an end to the fighting and has tabled proposals; Riyadh wants the strait secured first.',o:[
+   {l:'Press on to secure the strait',fpeff:{heat:4,peace:-2},rel:{SAU:3},eff:{approval:2},r:'You pressed on toward the strait.'},
+   {l:'Accept the UN envoy’s proposals for talks',fpeff:{peace:5,heat:-2},rel:{OMN:2,SAU:-2},eff:{approval:-2},r:'You accepted the UN envoy’s proposals for talks.'},
+   {l:'Hold your lines and open aid corridors',fpeff:{peace:2,heat:-1},eff:{treasury:-0.002,approval:1},r:'You held your lines and opened aid corridors.'}]},
+ {id:'rs_sau',fp:'redsea',who:['SAU'],opening:true,cat:'flashpoint',cd:150,w:1,t:'Missiles over Riyadh',d:'The Houthis claim missile and drone strikes on Riyadh’s airport and an Aramco refinery, and say their blockade of your shipping stands. Your air force proposes more strikes; Oman offers to carry messages.',o:[
+   {l:'Order more air strikes',fpeff:{heat:5,peace:-3},eff:{approval:2,infamy:2},r:'You ordered more air strikes.'},
+   {l:'Let Oman carry messages to the Houthis',fpeff:{peace:5,heat:-2},rel:{OMN:3,YEM:-2},eff:{approval:-1},r:'You let Oman carry messages.'},
+   {l:'Send more oil by pipeline and guard the ports',eff:{treasury:-0.006},r:'You sent more oil by pipeline and guarded the ports.'}]},
+ {id:'rs_egy',fp:'redsea',who:['EGY'],cat:'flashpoint',cd:200,w:1,t:'Fighting at the Bab el-Mandeb',d:'Fighting for the southern gate of the Red Sea has shipping lines sailing around Africa again, and your canal revenue falls. Riyadh asks you to join naval patrols.',o:[
+   {l:'Join naval patrols in the Red Sea',fpeff:{stance:0.1,heat:1},rel:{SAU:3},eff:{treasury:-0.002},r:'You joined naval patrols in the Red Sea.'},
+   {l:'Offer shipping lines toll discounts',eff:{treasury:-0.004,approval:1},r:'You offered toll discounts.'},
+   {l:'Press for talks under the UN envoy',fpeff:{peace:2},rel:{OMN:1},r:'You pressed for talks under the UN envoy.'}]},
+ {id:'rs_isr',fp:'redsea',who:['ISR'],cat:'flashpoint',cd:240,w:1,t:'Missiles from Yemen',d:'The Houthis have fired missiles at Israel since March, during the war with Iran. Your military proposes strikes on the ports they hold; Washington wants the Red Sea calm.',o:[
+   {l:'Strike Houthi-held ports',fpeff:{heat:4},rel:{USA:-1},eff:{approval:2,infamy:1},r:'You struck Houthi-held ports.'},
+   {l:'Rely on your air defences',eff:{treasury:-0.002},r:'You relied on your air defences.'},
+   {l:'Leave it to Saudi Arabia and Yemen’s government',eff:{approval:-1},r:'You left it to Saudi Arabia and Yemen’s government.'}]},
+ {id:'rs_talks',fp:'redsea',role:['mediator'],cat:'flashpoint',cd:180,w:1,t:'Talks on Yemen',d:'The UN envoy is looking for a way to stop the fighting in Yemen and the attacks on shipping, and needs a host for talks.',o:[
+   {l:'Host a round of talks',eff:{treasury:-0.002},fpeff:{peace:6,heat:-2},r:'You hosted a round of talks.'},
+   {l:'Carry messages only',fpeff:{peace:3},r:'You carried messages.'},
+   {l:'Decline',fpeff:{heat:1},r:'You declined.'}]},
+ {id:'say_redsea',fp:'redsea',role:['backer','stake','bystander'],cat:'flashpoint',cd:300,w:1,t:'A statement on the Red Sea',d:'Governments are stating their positions on the fighting in Yemen and the attacks on shipping.',o:[
+   {l:'Call for a ceasefire and free navigation',fpeff:{peace:1},pub:1,r:'You called for a ceasefire and free navigation.'},
+   {l:'Condemn the Houthi attacks on shipping and on Saudi Arabia',fpeff:{stance:0.05},rel:{SAU:3,YEM:2},pub:2,r:'You condemned the Houthi attacks.'},
+   {l:'Keep out of it',r:'You kept out of it.'}]},
  /* ---- CF-6 world prices: dealt with the briefing deck to anyone the prices reach (deck:'world'); the guards read the prices
    (oilPrice in $ a barrel; the others 1 = the game's start) and what you import (a negative share exports) ---- */
  {id:'price_fuel',deck:'world',cat:'prices',cd:180,w:1,when:[['oilPrice','>=',95],['oilImports','>',0.3]],t:'Fuel prices bite',d:'Oil costs over $95 a barrel, and fuel prices at home keep climbing. Drivers, farmers and factories want relief.',o:[
@@ -603,7 +649,9 @@ const FP_TEXT={you:'You {what}.',patron:'{who} is unhappy with your stance on {f
  collapse:'{fp}: the ceasefire has collapsed.',settled:'{fp}: the conflict is settled.',escalate:'{fp}: the situation has escalated to {stage}.',
  calm:'{fp}: the situation has eased to {stage}.',mediateWeak:'Your mediation made little headway: neither side trusts you enough.'};
 /* CF-6: prices: how much each stage moves a world price (PRICES), at full war; links: [flashpoint, share] of tension above this
-   one's own level that spills into another each month (Gaza ↔ Iran, Conflicts plan §2.2) */
+   one's own level that spills into another each month (Gaza ↔ Red Sea ↔ Iran; Taiwan ↔ Korea until the South China Sea is
+   built, Conflicts plan §2.2). CF-9: a side marked nonstate (the Houthi movement) has no country on the map, offers no step,
+   and no step, card or war leans anyone toward it (§5: help goes through states) */
 const FLASHPOINTS=[
  {id:'gaza',name:'Israel–Gaza',asOf:'2026-09-23',pos:[34.45,31.42],
   sides:{a:{name:'Israel',ids:['ISR'],icc:true},b:{name:'Palestinians in Gaza',ids:['PSE']}},
@@ -640,7 +688,7 @@ const FLASHPOINTS=[
     {t:'Amnesty International concluded in December 2024 that Israel was committing genocide in Gaza, and found on 27 November 2025 that the genocide continues despite the ceasefire. Israel called the 2024 report “entirely false” and “based on lies”.',src:'Amnesty International (5 Dec 2024; 27 Nov 2025); Israeli Ministry of Foreign Affairs (5 Dec 2024)'},
     {t:'South Africa brought a case against Israel under the Genocide Convention at the International Court of Justice in December 2023. The Court ordered provisional measures on 26 January 2024 and in later orders; the case continues.',src:'International Court of Justice, South Africa v. Israel'},
     {t:'The International Criminal Court issued arrest warrants on 21 November 2024 for Benjamin Netanyahu and Yoav Gallant for alleged war crimes and crimes against humanity.',src:'International Criminal Court'}]},
-  prices:{ship:0.2},links:[['iran',0.03]]},
+  prices:{ship:0.2},links:[['iran',0.03],['redsea',0.04]]},
  {id:'ukraine',name:'Russia–Ukraine',asOf:'2026-09-25',pos:[38.6,47.3],
   sides:{a:{name:'Ukraine',ids:['UKR']},b:{name:'Russia',ids:['RUS'],icc:true}},
   start:{stage:'war',heat:80,peace:15,front:0},dyn:{heat:78,talks:1.2,noise:8,front:-0.3},front:true,
@@ -717,7 +765,7 @@ const FLASHPOINTS=[
     {t:'Taiwan made about 92% of the world’s most advanced chips (below 10 nanometres) in 2019, by an industry estimate.',src:'Boston Consulting Group and Semiconductor Industry Association (Apr 2021)'}],
    claims:[
     {t:'China says Taiwan is an inalienable part of China and seeks “peaceful reunification”. Taiwan’s government says the Republic of China (Taiwan) and the People’s Republic are not subordinate to each other, and that only Taiwan’s people can decide its future.',src:'Taiwan Affairs Office of the State Council; Office of the President, Taiwan'}]},
-  prices:{chips:0.8}},
+  prices:{chips:0.8},links:[['korea',0.03]]},
  {id:'indpak',name:'India–Pakistan',asOf:'2026-09-01',pos:[74.4,34.0],
   sides:{a:{name:'India',ids:['IND']},b:{name:'Pakistan',ids:['PAK']}},
   start:{stage:'crisis',heat:44,peace:8},dyn:{heat:42,talks:0.3,noise:8},front:false,
@@ -764,7 +812,57 @@ const FLASHPOINTS=[
     {t:'Indirect talks resumed through Qatari mediators on 22 September 2026. The UN humanitarian office reports over 3,400 civilians killed in Iran; Israel reports 31 civilians killed.',src:'Reuters (Sep 2026); OCHA; Israeli authorities'}],
    claims:[
     {t:'The United States and Israel say they acted to stop Iran from obtaining a nuclear weapon. Iran says it is defending itself against aggression, denies seeking nuclear weapons, and demands the lifting of the naval blockade and the release of its frozen assets.',src:'The White House; Prime Minister’s Office, Israel; Iranian Ministry of Foreign Affairs (Sep 2026)'}]},
-  prices:{oil:0.5,ship:0.4},links:[['gaza',0.05]]}];
+  prices:{oil:0.5,ship:0.4},links:[['gaza',0.05],['redsea',0.05]]},
+ {id:'korea',name:'North–South Korea',asOf:'2026-10-04',pos:[127.0,38.3],
+  sides:{a:{name:'South Korea',ids:['KOR']},b:{name:'North Korea',ids:['PRK']}},
+  start:{stage:'crisis',heat:40,peace:8},dyn:{heat:40,talks:0.2,noise:7},front:false,
+  mediators:[], /* North Korea rejects talks with the South (Kim Yo Jong, 2 Oct 2026) */
+  backers:[
+   ['USA','a','troops','Bound to South Korea by the 1953 Mutual Defense Treaty; keeps about 28,500 troops there and supplies about 93% of its arms imports (2021–2025)','US Forces Korea; SIPRI Arms Transfers Database'],
+   ['RUS','b','support','Signed a treaty with North Korea on 19 June 2024 that pledges military assistance if either is attacked','KCNA; Kremlin (Jun 2024)'],
+   ['CHN','b','support','Bound to North Korea by the 1961 Treaty of Friendship, Cooperation and Mutual Assistance','PRC Ministry of Foreign Affairs']],
+  stakes:{JPN:'North Korean missiles come down in the seas around Japan, and one flew over it in October 2022'},
+  public:[{ids:['KOR'],care:1,side:'a'},{ids:['PRK'],care:1,side:'b'},{ids:['JPN'],care:0.6,side:'a'},{ids:['USA'],care:0.4,side:'a'},{ids:['CHN'],care:0.4,side:null}],
+  acts:{a:['speak','arm','support','sanction'],b:['speak','aid'],mid:['mediate']},
+  label:{speak_a:'Back the denuclearisation of North Korea',arm_a:'Sell weapons to South Korea',support_a:'Join exercises with South Korea and the United States',sanction_a:'Tighten sanctions on North Korea',
+   speak_b:'Back North Korea’s call to end sanctions and joint drills',aid_b:'Send food aid to North Korea',
+   mediate:'Offer to host inter-Korean talks',mediate_party:'Offer talks with the other Korea'},
+  card:{
+   facts:[
+    {t:'The Korean War ended in an armistice signed on 27 July 1953, not a peace treaty. The two Koreas remain divided along the Demilitarized Zone.',src:'Korean Armistice Agreement (1953); United Nations Command'},
+    {t:'North Korea has tested nuclear weapons six times since 2006, in breach of UN Security Council resolutions. Its deputy foreign minister told the UN General Assembly on 29 September 2026 that its nuclear status is “irreversible”.',src:'UN Security Council resolution 1718 (2006) and later resolutions; UN News (29 Sep 2026)'},
+    {t:'Kim Jong Un has called the two Koreas “two hostile states” since December 2023 and dropped the goal of reunification; in October 2024 North Korea blew up the road and rail links across the border, and it has since fortified the border with mines and anti-tank walls.',src:'KCNA (Dec 2023, Jan 2024); South Korean Joint Chiefs of Staff (15 Oct 2024)'},
+    {t:'On 21 September 2026 mines exploded about 10 metres south of the military demarcation line, wounding three South Korean soldiers. A joint inspection with the US-led UN Command concluded that North Korea planted them; North Korea rejects this. On 3 October it test-fired an intermediate-range missile from the Wonsan area.',src:'South Korean Ministry of National Defense (29 Sep 2026); South Korean Joint Chiefs of Staff (3 Oct 2026); AP (4 Oct 2026)'},
+    {t:'South Korea’s Samsung and SK hynix sold about two thirds of the world’s DRAM memory chips in early 2026.',src:'Counterpoint Research, Q1 2026 (Korea Times, 25 Jun 2026)'}],
+   claims:[
+    {t:'South Korea’s President Lee Jae-myung proposes “peaceful coexistence” and phased steps toward denuclearisation, with sanctions relief if the North halts new nuclear and missile development. North Korea calls the South a hostile state, says it will keep its nuclear weapons, and rejects talks while the United States keeps what it calls its “hostile policy” of sanctions and joint drills.',src:'Office of the President, Republic of Korea (UN General Assembly, 22 Sep 2026); KCNA (Sep–Oct 2026)'}]},
+  prices:{chips:0.3},links:[['taiwan',0.02]]},
+ {id:'redsea',name:'The Red Sea and Yemen',asOf:'2026-10-07',pos:[43.4,12.6],
+  sides:{a:{name:'Yemen’s government and Saudi Arabia',ids:['YEM','SAU']},b:{name:'The Houthi movement (Ansar Allah)',ids:[],nonstate:true}},
+  start:{stage:'war',heat:76,peace:12},dyn:{heat:76,talks:0.9,noise:8},front:false,
+  mediators:['OMN'],
+  backers:[
+   ['USA','a','arms','Supplies about 77% of Saudi Arabia’s arms imports (2021–2025); signed a Strategic Defense Agreement with it on 18 November 2025','SIPRI Arms Transfers Database; The White House (Nov 2025)'],
+   ['IRN','b','arms','UN experts have reported Iranian-made weapons and components in Houthi hands; Iran denies arming the group','UN Panel of Experts on Yemen; Iranian Ministry of Foreign Affairs']],
+  stakes:{
+   EGY:'Its Suez Canal revenue depends on ships passing the Bab el-Mandeb',ERI:'Its coast lies across the southern Red Sea from Yemen',
+   DJI:'Faces Yemen across the Bab el-Mandeb; hosts foreign naval bases',JOR:'Its only port, Aqaba, lies on the Red Sea',
+   ISR:'The Houthis have fired missiles and drones at it since 2023, again since March 2026'},
+  public:[{ids:['YEM','SAU'],care:1,side:'a'},{ids:['ISR'],care:0.5,side:'a'},{ids:['EGY'],care:0.5,side:null},{group:'Arab League',care:0.4,side:null}],
+  acts:{a:['speak','aid','arm','support','sanction'],b:[],mid:['mediate']},
+  label:{speak_a:'Condemn the Houthi attacks on shipping and on Saudi Arabia',aid_a:'Send aid to Yemen through its government',arm_a:'Sell weapons to Saudi Arabia',
+   support_a:'Join naval patrols protecting Red Sea shipping',sanction_a:'Sanction the Houthis’ financiers',
+   mediate:'Host talks on Yemen',mediate_party:'Agree to UN-led talks'},
+  card:{
+   facts:[
+    {t:'The Houthi movement (Ansar Allah) took Yemen’s capital, Sanaa, in September 2014. A Saudi-led coalition intervened for the internationally recognised government in March 2015; a UN-brokered truce in April 2022 largely halted the fighting.',src:'Office of the UN Special Envoy for Yemen; Al Jazeera (11 Sep 2026)'},
+    {t:'The United States designates the Houthi movement a Foreign Terrorist Organization (since 5 March 2025). The UN Security Council placed an arms embargo on its leaders in resolution 2216 (2015) and demanded an end to its attacks on shipping in resolution 2722 (2024).',src:'US State Department (4 Mar 2025); UN Security Council'},
+    {t:'About 12% of world trade passes the Bab el-Mandeb. From November 2023 the Houthis attacked ships there, saying they acted for Gaza, and stopped after the Gaza ceasefire of October 2025; on 28 March 2026, during the war with Iran, they resumed missile fire at Israel.',src:'Al Jazeera (11 Sep 2026); US Maritime Administration; The New York Times (28 Mar 2026)'},
+    {t:'After a strike on Sanaa airport on 13 July 2026, which Yemen’s government claimed, the Houthis declared a maritime blockade of Saudi Arabia on 20 July and attacked Saudi-linked ships. A strike on the cargo ship Tihamah on 11 August killed six people, by the Yemeni government’s count.',src:'Al Jazeera (14 Jul, 12 Aug 2026); Times of Israel (20 Jul 2026)'},
+    {t:'Houthi forces took Mokha and Yemen’s Red Sea coast to the Bab el-Mandeb on 10–11 September 2026. On 5 October Saudi Arabia said 100 jets had struck hundreds of Houthi targets and Yemen’s government said it had retaken Mokha; the Houthis denied losing ground and claimed missile and drone strikes on Riyadh’s airport and an Aramco refinery.',src:'Al Jazeera (10–11 Sep 2026); The National (5 Oct 2026); Reuters (5 Oct 2026)'}],
+   claims:[
+    {t:'The Houthis say their blockade answers Saudi Arabia’s blockade of the ports and airports they hold and the strike on Sanaa airport (“an eye for an eye”). Saudi Arabia rejects the word siege and says it is protecting navigation in the Red Sea; Yemen’s government says it is restoring the state’s authority over Houthi-held territory.',src:'Houthi military spokesman Yahya Saree (20 Jul 2026); Saudi Ministry of Foreign Affairs (21 Jul 2026); Presidential Leadership Council (4 Oct 2026)'}]},
+  prices:{ship:0.3,oil:0.15},links:[['gaza',0.03],['iran',0.04]]}];
 const FP=Object.fromEntries(FLASHPOINTS.map(f=>[f.id,f]));
 /* UN members among the map's shapes: everyone except these (observers, territories, disputed entities) */
 const UN_OUT=new Set(['PSE','TWN','CS-KM','-99','-99_2','ESH','GRL','PRI','BMU','FLK','GUF','NCL']);
@@ -811,7 +909,7 @@ function fpActs(fpId,id){const fp=FP[fpId],own=fpSideOf(fp,id),out=[];
  for(const s of ['a','b'])for(const act of fp.acts[s])out.push({act,side:s});for(const act of fp.acts.mid)out.push({act,side:null});return out;}
 function fpActLabel(fpId,act,side,id){const fp=FP[fpId];return (side?fp.label[act+'_'+side]:(fpSideOf(fp,id)&&fp.label[act+'_party'])||fp.label[act])||act;}
 function fpMove(fpId,d){const s=fpState[fpId],fp=FP[fpId];if(d.heat)s.heat=clamp(s.heat+d.heat,0,100);if(d.peace)s.peace=clamp(s.peace+d.peace,0,100);
- if(d.front&&fp.front)s.front=clamp(s.front+d.front,-100,100);if(d.stance)s.you.stance=clamp(s.you.stance+d.stance,-1,1);}
+ if(d.front&&fp.front)s.front=clamp(s.front+d.front,-100,100);if(d.stance)s.you.stance=clamp(s.you.stance+d.stance,fp.sides.b.nonstate?0:-1,fp.sides.a.nonstate?0:1);}
 /* a patron: gives you US aid (the only aid data so far) or supplies a fifth or more of your arms */
 function isPatron(pid,id){if(pid==='USA'&&(CAPABILITY.aid[id]||0)>=1e8)return true;const f=CAPABILITY.arms[id]?.from.find(x=>x[0]===pid);return !!f&&f[1]>=0.2;}
 function fpRel(fp,key,v){const ids=key==='a'||key==='b'?fp.sides[key].ids:[key];for(const id of ids)if(C[id]&&id!==player)C[id].rel=clamp(C[id].rel+relGain(v),0,100);}
@@ -978,7 +1076,7 @@ function initState(){
    if(POWER_SET.has(c.id))initPowerEcon(C[c.id]);
    order.push(c.id);totalGDP+=(c.gdp||2e9);
  }
- initPairwiseRelations();PR_HOSTILE={};eventCD={};gameDay=0;initFlashpoints();
+ initPairwiseRelations();PR_HOSTILE={};eventCD={};gameDay=0;initFlashpoints();endMsg=''; /* a new game never carries the last one's ending */
 }
 /* the game calendar runs in UTC (Date.UTC, getUTCMonth, timeZone:'UTC'), so one seed plays the same game in every time zone.
    It opens on the month of the data (CF-3): the flashpoint cards describe late September 2026. Saves keep their own date. */
